@@ -1,0 +1,49 @@
+# SonarQube scanner cache
+scanner-cache/
+
+# Credentials directory
+.sonarqube/
+
+# Logs
+*.log
+logs/
+
+# Docker volumes (in case they're created locally)
+sonarqube_data/
+sonarqube_extensions/
+sonarqube_logs/
+postgres_data/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+._.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+*.sublime-project
+
+# Backup files
+*.bak
+*~
+*.old
+*.orig
+*.tmp
+credentials.bak
+
+# Local environment files that should not be committed
+.env
+.env.local
+
+# Node modules in case you add any JS tools
+node_modules/

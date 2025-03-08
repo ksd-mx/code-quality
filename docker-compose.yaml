@@ -1,32 +1,33 @@
+version: '3'
+
 services:
   sonarqube:
     image: sonarqube:latest
+    container_name: sonarqube
     ports:
       - "9000:9000"
-    networks:
-      - sonarnet
     environment:
-      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
-      # Set up an admin token with a fixed value that scanner scripts can use
-      - SONAR_AUTH_TOKEN=sqa_cf866e2cc5ebdd6737c03a9bc50eba3a0a5a28dc
+      - SONAR_JDBC_URL=jdbc:postgresql://db:5432/sonar
+      - SONAR_JDBC_USERNAME=sonar
+      - SONAR_JDBC_PASSWORD=sonar
     volumes:
       - sonarqube_data:/opt/sonarqube/data
       - sonarqube_logs:/opt/sonarqube/logs
       - sonarqube_extensions:/opt/sonarqube/extensions
-      # Mount a script to create a token on startup
-      - ./setup-token.sh:/opt/setup-token.sh
-    restart: unless-stopped
-    # Don't override the entrypoint, let SonarQube start normally
-
-  # Add a separate service that runs after SonarQube starts
-  token-setup:
-    image: alpine:latest
     depends_on:
-      - sonarqube
+      - db
+    networks:
+      - sonarnet
+
+  db:
+    image: postgres:13
+    container_name: sonarqube-db
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+      - POSTGRES_DB=sonar
     volumes:
-      - ./setup-token.sh:/setup-token.sh
-    command: ["/bin/sh", "-c", "apk add --no-cache curl && chmod +x /setup-token.sh && /setup-token.sh"]
-    restart: on-failure
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - sonarnet
 
@@ -38,3 +39,5 @@ volumes:
   sonarqube_data:
   sonarqube_logs:
   sonarqube_extensions:
+  postgres_data:
+  scanner-cache:
