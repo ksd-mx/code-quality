@@ -1,0 +1,41 @@
+version: '3'
+services:
+  sonarqube:
+    image: sonarqube:latest
+    ports:
+      - "9000:9000"
+    networks:
+      - sonarnet
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+      # Set up an admin token with a fixed value that scanner scripts can use
+      - SONAR_AUTH_TOKEN=sqa_cf866e2cc5ebdd6737c03a9bc50eba3a0a5a28dc
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      # Mount a script to create a token on startup
+      - ./setup-token.sh:/opt/setup-token.sh
+    restart: unless-stopped
+    # Don't override the entrypoint, let SonarQube start normally
+
+  # Add a separate service that runs after SonarQube starts
+  token-setup:
+    image: alpine:latest
+    depends_on:
+      - sonarqube
+    volumes:
+      - ./setup-token.sh:/setup-token.sh
+    command: ["/bin/sh", "-c", "apk add --no-cache curl && chmod +x /setup-token.sh && /setup-token.sh"]
+    restart: on-failure
+    networks:
+      - sonarnet
+
+networks:
+  sonarnet:
+    driver: bridge
+
+volumes:
+  sonarqube_data:
+  sonarqube_logs:
+  sonarqube_extensions:

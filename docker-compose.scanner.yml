@@ -1,0 +1,14 @@
+version: '3'
+services:
+  sonar-scanner:
+    image: sonarsource/sonar-scanner-cli:latest
+    volumes:
+      - ./:/usr/src
+    working_dir: /usr/src
+    environment:
+      - SONAR_HOST_URL=http://host.docker.internal:9000
+      # This is the fixed token value that matches our SonarQube setup
+      - SONAR_LOGIN=sqa_cf866e2cc5ebdd6737c03a9bc50eba3a0a5a28dc
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # The command will be provided by the run script
